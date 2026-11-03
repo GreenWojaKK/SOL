@@ -1,0 +1,5 @@
+{
+  "base": "configs/conditional_bundling.json",
+  "primitive": {"model": "MK4", "seeds": [42, 43, 44]},
+  "methods": ["analog"]
+}

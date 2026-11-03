@@ -1,0 +1,543 @@
+{
+  "schema_version": 1,
+  "artifact_type": "experiment_design",
+  "design_id": "solarvpp-design",
+  "source": "solarvpp-design.md",
+  "workflow_policy": {
+    "execution": "period and level are independent; MK and recipe defaults accept explicit overrides",
+    "comparison_snapshot": "optional; validate model and stored settings when explicitly supplied",
+    "adoption": "explicit adopt command; experiment execution and statistical reports do not change champion",
+    "distribution_flags": "advisory by default; strict-distribution opts into acknowledgement gating"
+  },
+  "runtime": {
+    "environment": "FAI",
+    "dl_device": "cuda",
+    "gpu": "NVIDIA RTX 2000 Ada Generation Laptop GPU",
+    "new_environment_creation": false,
+    "parallel_cuda_training_jobs": 1
+  },
+  "task": {
+    "timezone": "Asia/Seoul",
+    "interval_hours": 1,
+    "interval_closed": "right",
+    "delivery_day": "date(ts - 1 hour)",
+    "forecast_issue_cutoff": "delivery_day - 1 day at 17:00",
+    "available_forecast_rounds": [
+      10,
+      17
+    ],
+    "groups": [
+      "G1",
+      "G2"
+    ],
+    "partition": "sites.current_group A->G1, B->G2",
+    "full_partition_minimum_capacity_kw": 20000
+  },
+  "periods": {
+    "initial_training_end": "2022-05-31 17:00:00+09:00",
+    "D": {
+      "start": "2022-06-01 01:00:00+09:00",
+      "end": "2023-06-01 00:00:00+09:00",
+      "role": "design_and_OOT",
+      "expected_hours": 8760,
+      "fit_cutoff": "2022-05-31 17:00:00+09:00"
+    },
+    "V": {
+      "start": "2023-06-01 01:00:00+09:00",
+      "end": "2024-06-01 00:00:00+09:00",
+      "role": "selection",
+      "expected_hours": 8784,
+      "fit_cutoff": "2023-05-31 17:00:00+09:00"
+    },
+    "H": {
+      "start": "2024-06-01 01:00:00+09:00",
+      "end": "2025-06-01 00:00:00+09:00",
+      "role": "retrospective_confirmation",
+      "expected_hours": 8760,
+      "exposure_status": "previously_exposed",
+      "fit_cutoff": "2024-05-31 17:00:00+09:00"
+    },
+    "B": {
+      "start": "2024-12-25 01:00:00+09:00",
+      "end": "2025-06-01 00:00:00+09:00",
+      "role": "bundling_diagnostic",
+      "expected_hours": 3792,
+      "exposure_status": "previously_exposed",
+      "fit_cutoff": "2024-12-24 17:00:00+09:00"
+    },
+    "test": {
+      "start": "2025-06-01 01:00:00+09:00",
+      "end": "2026-06-01 00:00:00+09:00",
+      "role": "submission",
+      "expected_hours": 8760,
+      "fit_cutoff": "2025-05-31 17:00:00+09:00"
+    }
+  },
+  "generation": {
+    "valid_label": "finite and energy >= 0",
+    "zero_is_valid": true,
+    "missing_label_fill": null,
+    "minimum_training_capacity_ratio": null,
+    "training_queries": "partition each original group/day by identical 24-bit generation-observation mask; skip all-zero masks",
+    "query_membership_fixed_within_day": true,
+    "target": "sum(valid member energy)/(sum(query capacity_kw)*1 hour)",
+    "loss": "capacity-weighted masked pinball",
+    "weather_learning_requires_generation": false
+  },
+  "evaluation": {
+    "cohort": "PV with valid generation at or before first delivery day D-1 17:00; freeze membership for the evaluation year",
+    "membership_frozen_for_period": true,
+    "label_mask": "all cohort PV labels valid within each group/hour",
+    "common_mask_across_variants": true,
+    "mask_depends_on_predictions": false,
+    "mask_depends_on_weather_missingness": false,
+    "primary_score": "S_cohort",
+    "penalty": "0.10 * sum(mask * SMP * k * abs(prediction-actual))",
+    "k_hours_3": [
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "k_other": 1,
+    "reports": [
+      "monthly",
+      "group",
+      "daylight_and_all",
+      "forecast_issue_round_weather_metrics",
+      "generation_coverage"
+    ]
+  },
+  "output": {
+    "models": [
+      "shared_query_XGBoost_quantile",
+      "provider_encoders_shared_query_BiGRU_quantile"
+    ],
+    "quantiles": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95
+    ],
+    "availability_multiplier": 1,
+    "decision": "final_quantile_0.5",
+    "night_output": 0
+  },
+  "forecast_recipes": {
+    "weighted-day-energy": {
+      "xgb_input": "forecast-physics",
+      "dl_input": "forecast-physics-daystate",
+      "dl_loss": "day-energy",
+      "aux_ratio": 0.1,
+      "dl_time_weight": "settlement",
+      "xgb_time_weight": "none"
+    }
+  },
+  "hyperparameters": {
+    "screening_seeds": [
+      42
+    ],
+    "confirmation_seeds": [
+      42,
+      43,
+      44
+    ],
+    "xgb_rounds": 400,
+    "xgb_max_depth": 5,
+    "xgb_learning_rate": 0.04,
+    "xgb_subsample": 0.8,
+    "xgb_colsample_bytree": 0.9,
+    "xgb_min_child_weight": 20,
+    "xgb_reg_lambda": 5,
+    "xgb_threads": 8,
+    "xgb_device": "cpu",
+    "dl_optimizer_steps": 2000,
+    "dl_batch_queries": 16,
+    "dl_weather_batch_station_days": 64,
+    "dl_provider_width": 32,
+    "dl_fusion_width": 64,
+    "dl_gru_hidden": 64,
+    "dl_gru_layers": 2,
+    "dl_dropout": 0.1,
+    "dl_learning_rate": 0.001,
+    "dl_weight_decay": 0.0001,
+    "dl_gradient_clip": 1.0,
+    "dl_precision": "float32",
+    "dl_schedule": "cosine over optimizer steps",
+    "checkpoint": "final_step",
+    "zca_epsilon": 0.01,
+    "dl_station_embedding_width": 8,
+    "dl_provider_mlp_widths": [
+      64,
+      32
+    ],
+    "dl_daystate_width": 16,
+    "dl_daystate_energy_weight": 1.0,
+    "dl_daystate_observed_weight": 0.1
+  },
+  "input_configs": {
+    "forecast-raw": {
+      "input_role": "forecast",
+      "providers": [
+        "wa",
+        "wb"
+      ],
+      "time_features": true,
+      "static": true,
+      "solar_geometry": false,
+      "disagreement": false,
+      "revision": false,
+      "physics_proxy": false
+    },
+    "forecast-solar": {
+      "input_role": "forecast",
+      "providers": [
+        "wa",
+        "wb"
+      ],
+      "time_features": true,
+      "static": true,
+      "solar_geometry": true,
+      "disagreement": false,
+      "revision": false,
+      "physics_proxy": false
+    },
+    "forecast-solar-diff": {
+      "input_role": "forecast",
+      "providers": [
+        "wa",
+        "wb"
+      ],
+      "time_features": true,
+      "static": true,
+      "solar_geometry": true,
+      "disagreement": true,
+      "revision": true,
+      "physics_proxy": false
+    },
+    "forecast-solar-physics": {
+      "input_role": "forecast",
+      "providers": [
+        "wa",
+        "wb"
+      ],
+      "time_features": true,
+      "static": true,
+      "solar_geometry": true,
+      "disagreement": false,
+      "revision": false,
+      "physics_proxy": true
+    },
+    "forecast-physics": {
+      "input_role": "forecast",
+      "providers": [
+        "wa",
+        "wb"
+      ],
+      "time_features": true,
+      "static": true,
+      "solar_geometry": true,
+      "disagreement": true,
+      "revision": true,
+      "physics_proxy": true
+    },
+    "forecast-physics-daycontext": {
+      "input_role": "forecast",
+      "providers": [
+        "wa",
+        "wb"
+      ],
+      "time_features": true,
+      "static": true,
+      "solar_geometry": true,
+      "disagreement": true,
+      "revision": true,
+      "physics_proxy": true,
+      "day_context": true
+    },
+    "forecast-physics-daystate": {
+      "input_role": "forecast",
+      "providers": [
+        "wa",
+        "wb"
+      ],
+      "time_features": true,
+      "static": true,
+      "solar_geometry": true,
+      "disagreement": true,
+      "revision": true,
+      "physics_proxy": true,
+      "day_context": true,
+      "day_state": true
+    }
+  },
+  "blending": {
+    "weighted-quantile": {
+      "type": "quantile_average",
+      "w": 0.5,
+      "sort_after_combination": true,
+      "note": "default for cells; registered models in configs/models.json carry their own xgb_weight"
+    }
+  },
+  "final_comparison": {
+    "candidates_frozen_on": "V_confirmation",
+    "finalist_count": 1,
+    "baseline": "champion",
+    "resampling": "paired dates with all groups/hours",
+    "block_days": 7,
+    "sensitivity_block_days": 14,
+    "replicates": 2000,
+    "confidence_level": 0.95,
+    "reporting_role": "retrospective_confirmation"
+  },
+  "cache_keys": [
+    "source_hash",
+    "schema_version",
+    "original_hash",
+    "cohort_policy",
+    "query_policy",
+    "outer_cutoff",
+    "inner_cutoff",
+    "input_role",
+    "model_settings",
+    "seed",
+    "package_versions"
+  ],
+  "result_status_fields": [
+    "execution_status",
+    "evaluation_status",
+    "selection_status"
+  ],
+  "submission_input_roles": [
+    "forecast"
+  ],
+  "input_common": {
+    "time_features": "interval-midpoint clock hour sin/cos and delivery-day day-of-year sin/cos, XGB and DL, all input configs",
+    "static_xgb": [
+      "lat",
+      "lon",
+      "capacity_kw",
+      "wa_dist",
+      "wb_dist"
+    ],
+    "static_dl": [
+      "lat",
+      "lon",
+      "capacity_kw"
+    ],
+    "fixed_across_inputs": [
+      "night rule from solar geometry",
+      "XGB power-curve target transform z - power_curve"
+    ],
+    "f0_removed_columns": [
+      "solar position",
+      "power_curve value",
+      "sunup capacity share"
+    ],
+    "inactive_dl_blocks": "zero input with mask; same trunk size",
+    "coordinates": "provided PV coordinates (shifted up to 2 km, rounded to 4 decimals) are used as is; station mapping and distances come from sites.csv"
+  },
+  "physics_proxy": {
+    "clear_sky_ghi": "Haurwitz 1098*cosz*exp(-0.057/cosz) W/m2, 0 if cosz <= 0; one per PV and hour at the interval midpoint",
+    "cloud_adjusted_irradiance": "G_cs*(1 - 0.75*c^3.4), c = cloud/100; per provider and round",
+    "dew_point_spread": "T - T_d; wb uses forecast dew point, wa uses Magnus (a=17.62, b=243.12 C) from T and RH clipped to [1, 100] %; per provider and round",
+    "temperature_derating": "1 - 0.004*(T_module - 25), T_module = T + 0.031*G; per provider and round",
+    "xgb": "capacity-weighted mean and std over query members",
+    "dl": "x_common in PV fusion (depends on PV coordinates through G_cs)",
+    "learned": false
+  },
+  "loss_configs": {
+    "pinball": {
+      "loss": "capacity-weighted masked pinball (solarvpp-design.md#losses)"
+    },
+    "mae": {
+      "aux": "mean |m - z|",
+      "mask": "daylight valid hours, capacity-weighted as pinball"
+    },
+    "mse": {
+      "aux": "mean (m - z)^2",
+      "mask": "daylight valid hours, capacity-weighted as pinball"
+    },
+    "ramp": {
+      "aux": "ramp",
+      "formula": "mean_{t=2..24} |(m~_t - m~_{t-1}) - (z~_t - z~_{t-1})|",
+      "mask": "profile"
+    },
+    "fourier": {
+      "aux": "FAL",
+      "formula": "mean_{k=0..12} (|rfft(m~)_k| - |rfft(z~)_k|)^2",
+      "mask": "profile"
+    },
+    "cosine": {
+      "aux": "cosine",
+      "formula": "1 - <m~, z~>/(||m~|| ||z~|| + eps)",
+      "mask": "profile",
+      "note": "full-spectrum FCL equals cosine loss by Parseval; one cell"
+    },
+    "day-energy": {
+      "aux": "day_energy",
+      "formula": "abs(sum_h slot_weight_h * D_h * (q_0.5,h - z_h))",
+      "mask": "complete 24-hour labels; daylight by solar geometry",
+      "weighting": "query capacity C_A",
+      "slot_weight": "same as main pinball: k for time_weight=settlement, otherwise 1",
+      "lambda": "existing gradient-ratio calibration with r=0.1 by default",
+      "daystate_energy_head_weight": 0,
+      "daystate_observed_supervision": "retain throughout training"
+    },
+    "target_output": "DL median quantile m in normalized z units; XGB loss unchanged",
+    "profile_mask": {
+      "query_days": "complete 24-hour labels",
+      "daylight": "solar-geometry mask, not Y > 0",
+      "night": "prediction and target set to 0 (m~ = m*D, z~ = z*D)",
+      "axis": "full 24 hours",
+      "ramp_includes_sunrise_sunset": true,
+      "cosine_excludes_all_zero_target": true,
+      "weighting": "query capacity C_A",
+      "l0_uses_incomplete_days": true
+    }
+  },
+  "aux_lambda": {
+    "method": "gradient_ratio_calibrated_once",
+    "formula": "lambda_k = r * E||grad L_pinball|| / E||grad L_k||",
+    "warmup_steps_l0_only": 200,
+    "calibration_batches": 20,
+    "calibration_point": "shared pinball checkpoint at step 200, next 20 scheduled batches, all parameters",
+    "fixed_after_calibration": true,
+    "total_steps": 2000,
+    "aux_ratio_screening": 0.1,
+    "r_policy": "grid values are defaults; any finite nonnegative r can be specified",
+    "r_followup": [
+      0.03,
+      0.1,
+      0.3
+    ],
+    "recorded_per": [
+      "input_config",
+      "seed"
+    ]
+  },
+  "noise_floor": {
+    "period": "V",
+    "cell": {
+      "input": "forecast-solar-diff",
+      "loss": "pinball"
+    },
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51
+    ],
+    "metric": "seed std of W_cohort for xgb, dl and blend",
+    "single_seed_threshold": "2*sqrt(2)*sigma",
+    "threshold_role": "advisory; rank all completed candidates even when reference or noise floor is unavailable"
+  },
+  "screening_grid": {
+    "period": "V",
+    "inputs": [
+      "forecast-raw",
+      "forecast-solar",
+      "forecast-solar-diff",
+      "forecast-solar-physics",
+      "forecast-physics"
+    ],
+    "losses": [
+      "pinball",
+      "mae",
+      "mse",
+      "ramp",
+      "fourier",
+      "cosine"
+    ],
+    "cells": 30,
+    "seed": 42,
+    "aux_ratio": 0.1,
+    "confirmation": {
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "candidates": "explicitly selected cells; noise-floor and bootstrap results remain advisory"
+    },
+    "judgement": {
+      "loss_effect": "dl component delta W_cohort averaged over input configs",
+      "input_effect": "xgb, dl and blend delta W_cohort averaged over losses; 2x2 main effects of dr and phys over forecast-solar and the forecast-raw to forecast-solar difference",
+      "same_evaluation_panel": true
+    }
+  },
+  "experiment_order": [
+    "noise_floor",
+    "input_loss_screening",
+    "confirmation_and_r_followup",
+    "conditional_bundling"
+  ],
+  "experiment_order_role": "default research sequence; each command resolves only its own dependencies",
+  "bundling_search": {
+    "instances": {
+      "V": {
+        "cutoff": "V",
+        "estimation": [
+          "D"
+        ],
+        "evaluation": "V"
+      },
+      "H": {
+        "cutoff": "H",
+        "estimation": [
+          "V"
+        ],
+        "evaluation": "H"
+      },
+      "B": {
+        "cutoff": "B",
+        "estimation": [
+          "H"
+        ],
+        "evaluation": "B"
+      },
+      "test": {
+        "cutoff": "test",
+        "estimation": [
+          "H",
+          "B"
+        ],
+        "evaluation": null
+      }
+    },
+    "estimation_rule": "site errors at or before the instance cutoff only; a later forecast period overwrites an earlier one on shared hours; night entries are excluded",
+    "weights": "w_h = 0.10 * SMP_h * k_h; objective block weights come from the evaluation or test period",
+    "covariance": {
+      "unit": "per-kW error e_ih / c_i",
+      "blocks": [
+        "k3",
+        "k1"
+      ],
+      "pseudo_count_hours": 200,
+      "min_overlap_hours": 1000,
+      "psd": "eigenvalue clipping at zero"
+    }
+  }
+}

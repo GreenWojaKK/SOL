@@ -1,0 +1,96 @@
+{
+  "name": "solarvpp2-runtime",
+  "paths": {
+    "data_dir": "participant_dataset",
+    "artifact_dir": "../sol-artifact/solarvpp2",
+    "schema": "docs/weather-schema.json",
+    "models": "configs/solarvpp2/models.json",
+    "calendar": "configs/calendar.json"
+  },
+  "runtime": {
+    "torch_threads": 4,
+    "dl_preload_max_gib": 4.0,
+    "fused_cache_max_gib": 2.0,
+    "search_state_max_gib": 3.0,
+    "cublas_workspace": ":4096:8"
+  },
+  "quantiles": [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95],
+  "hyperparameters": {
+    "xgb_rounds": 400,
+    "xgb_max_depth": 5,
+    "xgb_learning_rate": 0.04,
+    "xgb_subsample": 0.8,
+    "xgb_colsample_bytree": 0.9,
+    "xgb_min_child_weight": 20,
+    "xgb_reg_lambda": 5,
+    "xgb_threads": 8,
+    "xgb_device": "cuda",
+    "dl_optimizer_steps": 2000,
+    "dl_batch_queries": 16,
+    "dl_provider_width": 32,
+    "dl_fusion_width": 64,
+    "dl_gru_hidden": 64,
+    "dl_gru_layers": 2,
+    "dl_dropout": 0.1,
+    "dl_learning_rate": 0.001,
+    "dl_weight_decay": 0.0001,
+    "dl_gradient_clip": 1.0,
+    "dl_station_embedding_width": 8,
+    "dl_provider_mlp_widths": [64, 32],
+    "dl_daystate_width": 16,
+    "dl_daystate_energy_weight": 1.0,
+    "dl_daystate_observed_weight": 0.1,
+    "zca_epsilon": 0.01
+  },
+  "aux_lambda": {
+    "warmup_steps": 200,
+    "calibration_batches": 20
+  },
+  "input_configs": {
+    "forecast-physics": {"input_role": "forecast", "providers": ["wa", "wb"], "time_features": true, "solar_geometry": true,
+                      "disagreement": true, "revision": true, "physics_proxy": true},
+    "forecast-physics-daystate": {"input_role": "forecast", "providers": ["wa", "wb"], "time_features": true, "solar_geometry": true,
+                                "disagreement": true, "revision": true, "physics_proxy": true, "day_context": true, "day_state": true}
+  },
+  "excluded_inputs": [
+    {
+      "inputs": ["wa_temp_max", "wa_temp_min"],
+      "reason": "2025-05-31 17시 이전 forecast_wa 행의 99.999%(max)·99.996%(min)에서 wa_temp와 값이 같다. 2022-05-31 17시 이전에서도 99.996%·99.988%이다. 정보가 없고 ZCA에서 분산이 거의 없는 방향을 증폭한다."
+    }
+  ],
+  "smoke": {
+    "train_days": 120,
+    "seeds": [42],
+    "xgb_rounds": 10,
+    "dl_steps": 50,
+    "aux_warmup_steps": 10,
+    "aux_calibration_batches": 5,
+    "risk_epochs": 1,
+    "search_iterations": 2,
+    "search_moves": 4,
+    "candidate_pool": 3,
+    "eval_days": 7,
+    "objective_days": 14
+  },
+  "evaluation": {
+    "bootstrap_blocks": [7, 14],
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed": 42,
+    "candidate_pool_size": 200,
+    "candidate_pool_seed": 9301,
+    "calibration_bins": 10
+  },
+  "panels": {
+    "p60-v1": {
+      "instance": "test",
+      "buffer_days": 1,
+      "blocks": [["2024-06-03", "2024-06-07"], ["2024-07-22", "2024-07-26"], ["2024-08-13", "2024-08-17"], ["2024-09-07", "2024-09-11"],
+                 ["2024-10-26", "2024-10-30"], ["2024-11-05", "2024-11-09"], ["2024-12-12", "2024-12-16"], ["2025-01-23", "2025-01-27"],
+                 ["2025-02-01", "2025-02-05"], ["2025-03-22", "2025-03-26"], ["2025-04-10", "2025-04-14"], ["2025-05-10", "2025-05-14"]]
+    }
+  },
+  "experiments": {
+    "transfer": {"kind": "fixed-partition-decoder", "parent_model": "MK5", "history_months": 12, "steps": 500, "batch_queries": 16, "target_fraction": 0.5, "learning_rate": 0.0001, "weight_decay": 0.0001, "gradient_clip": 1.0, "shrinkage_days": 20.0},
+    "recalibration": {"kind": "seasonal-location-scale-W", "shrinkage_days": 20.0}
+  }
+}

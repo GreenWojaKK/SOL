@@ -1,0 +1,5 @@
+# viewer-ui와 GPUI fork(Zed v1.26.2)가 쓰는 toolchain과 맞춘다.
+[toolchain]
+channel = "1.98.1"
+profile = "minimal"
+components = ["rustfmt", "clippy"]

@@ -1,0 +1,22 @@
+[package]
+name = "probabilistic-viewer"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "vppcontract probabilistic 결과 폴더를 보는 데스크톱 viewer"
+
+[dependencies]
+# 화면 부품은 TPUI의 viewer-ui를 쓴다. GPUI는 viewer-ui와 같은 fork 커밋으로 맞춘다.
+viewer-ui = { git = "https://github.com/GreenWojaKK/TPUI", rev = "174ad5d947b94f8e188ff6c3d7778ee41841a31a" }
+gpui = { git = "https://github.com/GreenWojaKK/zed", rev = "f941f6a1c26a295c051e2a3776d9897093b3db8c" }
+gpui_platform = { git = "https://github.com/GreenWojaKK/zed", rev = "f941f6a1c26a295c051e2a3776d9897093b3db8c" }
+serde = { version = "1.0.229", features = ["derive"] }
+# expert 순서를 파일에 적힌 순서대로 유지한다.
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
+
+# debug 빌드 용량을 줄인다. 이 앱 코드는 줄 번호만, 의존성은 디버그 정보 없이 빌드한다.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false

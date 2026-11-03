@@ -1,0 +1,712 @@
+{
+  "schema_version": 1,
+  "timezone": "Asia/Seoul",
+  "target_step_hours": 1,
+  "keys": {
+    "forecast": [
+      "provider_station",
+      "round",
+      "ts"
+    ],
+    "observed": [
+      "provider_station",
+      "ts"
+    ]
+  },
+  "providers": {
+    "wa": {
+      "forecast_schema": [
+        {
+          "name": "wa_station",
+          "type": "string"
+        },
+        {
+          "name": "round",
+          "type": "int64"
+        },
+        {
+          "name": "ts",
+          "type": "timestamp[us, tz=Asia/Seoul]"
+        },
+        {
+          "name": "wa_cloud",
+          "type": "double"
+        },
+        {
+          "name": "wa_temp",
+          "type": "double"
+        },
+        {
+          "name": "wa_temp_max",
+          "type": "double"
+        },
+        {
+          "name": "wa_temp_min",
+          "type": "double"
+        },
+        {
+          "name": "wa_humidity",
+          "type": "double"
+        },
+        {
+          "name": "wa_ground_press",
+          "type": "double"
+        },
+        {
+          "name": "wa_wind_speed",
+          "type": "double"
+        },
+        {
+          "name": "wa_wind_dir",
+          "type": "double"
+        },
+        {
+          "name": "wa_rain",
+          "type": "double"
+        },
+        {
+          "name": "wa_snow",
+          "type": "double"
+        }
+      ],
+      "observed_schema": [
+        {
+          "name": "wa_station",
+          "type": "string"
+        },
+        {
+          "name": "ts",
+          "type": "timestamp[us, tz=Asia/Seoul]"
+        },
+        {
+          "name": "wa_cloud",
+          "type": "double"
+        },
+        {
+          "name": "wa_temp",
+          "type": "double"
+        },
+        {
+          "name": "wa_temp_max",
+          "type": "double"
+        },
+        {
+          "name": "wa_temp_min",
+          "type": "double"
+        },
+        {
+          "name": "wa_humidity",
+          "type": "double"
+        },
+        {
+          "name": "wa_ground_press",
+          "type": "double"
+        },
+        {
+          "name": "wa_wind_speed",
+          "type": "double"
+        },
+        {
+          "name": "wa_wind_dir",
+          "type": "double"
+        },
+        {
+          "name": "wa_rain",
+          "type": "double"
+        },
+        {
+          "name": "wa_snow",
+          "type": "double"
+        }
+      ],
+      "weather_fields": [
+        {
+          "name": "wa_cloud",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_temp",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_temp_max",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_temp_min",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_humidity",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_ground_press",
+          "source_unit": "hPa",
+          "canonical_unit": "hPa",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_wind_speed",
+          "source_unit": "m/s",
+          "canonical_unit": "m/s",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_wind_dir",
+          "source_unit": "degree",
+          "canonical_unit": "degree",
+          "scale_factor": 1.0,
+          "representation": "sin(theta), cos(theta); retain raw degree in source table",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_rain",
+          "source_unit": "mm",
+          "canonical_unit": "mm",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wa_snow",
+          "source_unit": "mm",
+          "canonical_unit": "mm",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        }
+      ],
+      "shared_targets": [
+        "wa_cloud",
+        "wa_temp",
+        "wa_temp_max",
+        "wa_temp_min",
+        "wa_humidity",
+        "wa_ground_press",
+        "wa_wind_speed",
+        "wa_wind_dir",
+        "wa_rain",
+        "wa_snow"
+      ],
+      "forecast_only": [],
+      "observed_only": []
+    },
+    "wb": {
+      "forecast_schema": [
+        {
+          "name": "wb_station",
+          "type": "string"
+        },
+        {
+          "name": "round",
+          "type": "int64"
+        },
+        {
+          "name": "ts",
+          "type": "timestamp[us, tz=Asia/Seoul]"
+        },
+        {
+          "name": "wb_temp",
+          "type": "double"
+        },
+        {
+          "name": "wb_feel_temp",
+          "type": "double"
+        },
+        {
+          "name": "wb_wet_bulb_temp",
+          "type": "double"
+        },
+        {
+          "name": "wb_dew_point",
+          "type": "double"
+        },
+        {
+          "name": "wb_wind_speed",
+          "type": "double"
+        },
+        {
+          "name": "wb_wind_dir",
+          "type": "double"
+        },
+        {
+          "name": "wb_wind_gust_spd",
+          "type": "double"
+        },
+        {
+          "name": "wb_rel_hum",
+          "type": "double"
+        },
+        {
+          "name": "wb_vis",
+          "type": "double"
+        },
+        {
+          "name": "wb_ceiling",
+          "type": "double"
+        },
+        {
+          "name": "wb_uv_idx",
+          "type": "double"
+        },
+        {
+          "name": "wb_precip_prob",
+          "type": "double"
+        },
+        {
+          "name": "wb_rain_prob",
+          "type": "double"
+        },
+        {
+          "name": "wb_snow_prob",
+          "type": "double"
+        },
+        {
+          "name": "wb_ice_prob",
+          "type": "double"
+        },
+        {
+          "name": "wb_total_liq",
+          "type": "double"
+        },
+        {
+          "name": "wb_rain",
+          "type": "double"
+        },
+        {
+          "name": "wb_snow",
+          "type": "double"
+        },
+        {
+          "name": "wb_ice",
+          "type": "double"
+        },
+        {
+          "name": "wb_cloud",
+          "type": "double"
+        }
+      ],
+      "observed_schema": [
+        {
+          "name": "wb_station",
+          "type": "string"
+        },
+        {
+          "name": "ts",
+          "type": "timestamp[us, tz=Asia/Seoul]"
+        },
+        {
+          "name": "wb_temp",
+          "type": "double"
+        },
+        {
+          "name": "wb_feel_temp",
+          "type": "double"
+        },
+        {
+          "name": "wb_feel_temp_shade",
+          "type": "double"
+        },
+        {
+          "name": "wb_rel_hum",
+          "type": "double"
+        },
+        {
+          "name": "wb_dew_point",
+          "type": "double"
+        },
+        {
+          "name": "wb_wind_dir",
+          "type": "double"
+        },
+        {
+          "name": "wb_wind_speed",
+          "type": "double"
+        },
+        {
+          "name": "wb_uv_idx",
+          "type": "double"
+        },
+        {
+          "name": "wb_vis",
+          "type": "double"
+        },
+        {
+          "name": "wb_cloud",
+          "type": "double"
+        },
+        {
+          "name": "wb_ceiling",
+          "type": "double"
+        },
+        {
+          "name": "wb_pressure",
+          "type": "double"
+        },
+        {
+          "name": "wb_appr_temp",
+          "type": "double"
+        },
+        {
+          "name": "wb_wind_chill_temp",
+          "type": "double"
+        },
+        {
+          "name": "wb_precip_1h",
+          "type": "double"
+        }
+      ],
+      "weather_fields": [
+        {
+          "name": "wb_temp",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_feel_temp",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_wet_bulb_temp",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_dew_point",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_wind_speed",
+          "source_unit": "km/h",
+          "canonical_unit": "m/s",
+          "scale_factor": 0.2777777777777778,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_wind_dir",
+          "source_unit": "degree",
+          "canonical_unit": "degree",
+          "scale_factor": 1.0,
+          "representation": "sin(theta), cos(theta); retain raw degree in source table",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_wind_gust_spd",
+          "source_unit": "km/h",
+          "canonical_unit": "m/s",
+          "scale_factor": 0.2777777777777778,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_rel_hum",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_vis",
+          "source_unit": "km",
+          "canonical_unit": "km",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_ceiling",
+          "source_unit": "m",
+          "canonical_unit": "m",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_uv_idx",
+          "source_unit": "index",
+          "canonical_unit": "index",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_precip_prob",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_rain_prob",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_snow_prob",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_ice_prob",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_total_liq",
+          "source_unit": "mm",
+          "canonical_unit": "mm",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_rain",
+          "source_unit": "mm",
+          "canonical_unit": "mm",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_snow",
+          "source_unit": "cm",
+          "canonical_unit": "mm",
+          "scale_factor": 10.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_ice",
+          "source_unit": "mm",
+          "canonical_unit": "mm",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": false,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_cloud",
+          "source_unit": "percent",
+          "canonical_unit": "percent",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": true,
+          "in_observed": true,
+          "forecast_to_observed_target": true
+        },
+        {
+          "name": "wb_feel_temp_shade",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": false,
+          "in_observed": true,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_pressure",
+          "source_unit": "hPa",
+          "canonical_unit": "hPa",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": false,
+          "in_observed": true,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_appr_temp",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": false,
+          "in_observed": true,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_wind_chill_temp",
+          "source_unit": "degC",
+          "canonical_unit": "degC",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": false,
+          "in_observed": true,
+          "forecast_to_observed_target": false
+        },
+        {
+          "name": "wb_precip_1h",
+          "source_unit": "mm",
+          "canonical_unit": "mm",
+          "scale_factor": 1.0,
+          "representation": "scalar",
+          "in_forecast": false,
+          "in_observed": true,
+          "forecast_to_observed_target": false
+        }
+      ],
+      "shared_targets": [
+        "wb_temp",
+        "wb_feel_temp",
+        "wb_dew_point",
+        "wb_wind_speed",
+        "wb_wind_dir",
+        "wb_rel_hum",
+        "wb_vis",
+        "wb_ceiling",
+        "wb_uv_idx",
+        "wb_cloud"
+      ],
+      "forecast_only": [
+        "wb_wet_bulb_temp",
+        "wb_wind_gust_spd",
+        "wb_precip_prob",
+        "wb_rain_prob",
+        "wb_snow_prob",
+        "wb_ice_prob",
+        "wb_total_liq",
+        "wb_rain",
+        "wb_snow",
+        "wb_ice"
+      ],
+      "observed_only": [
+        "wb_feel_temp_shade",
+        "wb_pressure",
+        "wb_appr_temp",
+        "wb_wind_chill_temp",
+        "wb_precip_1h"
+      ]
+    }
+  },
+  "cross_provider_variables": [
+    "temperature",
+    "relative_humidity",
+    "cloud",
+    "wind_speed_ms",
+    "wind_speed_times_sin_direction",
+    "wind_speed_times_cos_direction"
+  ],
+  "observation_quality": {
+    "duplicate_key": "Keep agreeing field values; mask each conflicting field at that key.",
+    "off_hour_key": "Preserve in audit; exclude from exact hourly joins without rounding.",
+    "invalid_targets": {
+      "wa_wind_speed": ">50 m/s including 9999",
+      "wb_wind_speed": ">200 km/h before unit conversion",
+      "wb_cloud": "outside [0,100]",
+      "wb_rel_hum": "outside [0,100]",
+      "wa_cloud": "outside [0,100]",
+      "wa_humidity": "outside [0,100]",
+      "wb_uv_idx": "outside [0,15]",
+      "wb_vis": "outside [0,50] km",
+      "wb_pressure": "<900 hPa"
+    }
+  }
+}

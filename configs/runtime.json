@@ -1,0 +1,132 @@
+{
+  "name": "runtime",
+  "paths": {
+    "data_dir": "participant_dataset",
+    "artifact_dir": "../sol-artifact/solarvpp",
+    "protocol": "docs/solarvpp-protocol.json",
+    "schema": "docs/weather-schema.json",
+    "evidence": "docs/evidence/cohort-coverage.json",
+    "models": "configs/models.json",
+    "calendar": "configs/calendar.json"
+  },
+  "runtime": {
+    "torch_threads": 4,
+    "dl_preload_max_gib": 4.0,
+    "cublas_workspace": ":4096:8"
+  },
+  "smoke": {
+    "train_days": 60,
+    "eval_days": 14,
+    "xgb_rounds": 10,
+    "dl_steps": 50,
+    "aux_warmup_steps": 10,
+    "aux_calibration_batches": 5
+  },
+  "deviations": [
+    {
+      "id": "exclude-wa-ground-press",
+      "inputs": [
+        "wa_ground_press"
+      ],
+      "scope": "forecast 역할 generation 입력의 원값과 revision",
+      "status": "approved",
+      "reason": "test forecast_wa의 wa_ground_press는 2026-01-22~24 사이에 지점기압으로 정의가 바뀌고 학습·D/V/H에는 이 변화가 없다.",
+      "evidence": "docs/data-characteristics.md 1절"
+    },
+    {
+      "id": "exclude-wa-temp-extrema",
+      "inputs": [
+        "wa_temp_max",
+        "wa_temp_min"
+      ],
+      "scope": "forecast 역할 generation 입력",
+      "status": "measured",
+      "reason": "forecast 행의 99.995%에서 wa_temp와 값이 같아 정보가 없고, ZCA에서 분산이 거의 없는 방향을 최대 10배 증폭한다. cache와 observed에는 보존한다."
+    }
+  ],
+  "interpretations": [
+    {
+      "id": "delivery-month",
+      "rule": "월 단위 집계는 대상일 date(ts-1h)의 월로 묶는다. 이 기준에서 cohort evidence의 월별 시간이 재현된다."
+    },
+    {
+      "id": "night-rule",
+      "rule": "구성 PV 전부에서 구간 시작·중앙·끝의 태양고도가 모두 0 이하이면 야간이다. XGB 학습 행, DL 손실, 후처리가 같은 규칙을 쓴다.",
+      "evidence": "중앙 시각만 쓰면 발전량의 0.10%, 세 시점을 쓰면 0.0034%를 야간으로 버린다."
+    },
+    {
+      "id": "forecast-quality-scope",
+      "rule": "forecast에는 정시 외·중복 키 규칙만 적용하고 범위 규칙은 observed에만 적용한다. forecast 결측은 XGB에서 NaN, DL에서 대체값과 결측 indicator로 처리한다."
+    },
+    {
+      "id": "capacity-weighted-aggregation",
+      "rule": "용량 가중 평균·표준편차는 값이 있는 구성 PV로 가중치를 다시 정규화하고, 모두 결측이면 NaN이다. 제공사·round별 결측 용량 비율을 feature로 추가한다."
+    },
+    {
+      "id": "zca-scope",
+      "rule": "제공사별로 두 round를 합친 station-시각 행으로 대체·표준화·ZCA를 fit하고, DL revision은 whitening 뒤 17-10으로 계산한다."
+    },
+    {
+      "id": "xgb-weight-normalization",
+      "rule": "XGB sample weight는 query 용량 C_A를 학습 행 평균 1로 정규화한다. kW 규모 그대로 쓰면 min_child_weight와 lambda가 사실상 무력해진다."
+    },
+    {
+      "id": "partition-indicator",
+      "rule": "XGB의 구성 indicator는 단일 이진 열 is_G2이고, DL의 구성 mask는 query pooling의 구성 PV mask이다."
+    },
+    {
+      "id": "time-representation",
+      "rule": "DL 시간 표현은 slot과 연중일의 sin·cos이다."
+    },
+    {
+      "id": "cell-naming",
+      "rule": "입력×손실 칸 이름은 {입력}__{손실}이고, 보조손실 칸은 -aux{세기}, 정산 시간 가중은 -settlement를 손실 뒤에 붙인다. 두 expert의 구성이 다르면 XGB.{F}[-k]__DL.{입력}__{손실}로 쓴다."
+    },
+    {
+      "id": "xgb-time-features",
+      "rule": "XGB 시간 표현(구간 중앙 시각·연중일 sin·cos)은 query 안의 PV가 모두 같으므로 평균·표준편차 없이 query 단위 열 4개로 둔다."
+    },
+    {
+      "id": "dl-input-blocks",
+      "rule": "DL x_common은 disagreement 12, 태양 위치 4, PV physics 13 채널로 크기를 고정하고, 입력 구성에서 끈 묶음은 0으로 둔다. PV physics는 fit 구간 PV-시각으로 표준화한다."
+    },
+    {
+      "id": "aux-calibration",
+      "rule": "λ는 warm-up 직후 schedule의 다음 batch로 잰다. 적용 표본이 없는 batch는 건너뛰고, gradient norm은 전체 parameter의 L2 norm이다. 측정은 학습 모드로 하되 RNG 상태를 보존해 보조손실 칸의 이후 dropout 순서를 pinball 칸과 같게 둔다."
+    },
+    {
+      "id": "aux-numerics",
+      "rule": "L_ramp는 시간 차분 오차의 절댓값 평균(평가의 ramp MAE와 같은 형태)이다. FAL 진폭은 sqrt(re²+im²+1e-12)로 계산해 gradient를 유한하게 두고, L_cos 분모에는 1e-6을 더한다."
+    },
+    {
+      "id": "noise-floor",
+      "rule": "noise floor의 seed별 블렌드는 같은 seed의 XGB와 DL을 0.5로 결합한다. σ는 seed 10개 W_cohort의 표본 표준편차(ddof=1)이다."
+    },
+    {
+      "id": "screening-candidate",
+      "rule": "screening 후보는 기준 칸 forecast-solar-diff__pinball(seed 42) 대비 블렌드 ΔW_cohort < -2√2·σ_blend 이거나 DL 성분 ΔW_cohort < -2√2·σ_DL 인 칸이다."
+    }
+  ],
+  "curtailment": {
+    "half_life_days": 60.0,
+    "clear_cloud_pct": 20.0,
+    "reference_quantile": 0.9,
+    "cut_ratio": 0.5,
+    "shoulder_ratio": 0.5,
+    "min_plants": 2,
+    "min_cut_kw": 500.0,
+    "ridge": 1.0,
+    "forecast_clearness": 0.9,
+    "min_forecast_share": 0.1,
+    "prior_strength": 2.0
+  },
+  "test_input_check": {
+    "reference_start": "2024-06-01",
+    "reference_end": "2025-05-31",
+    "mean_shift": 1.0,
+    "mean_shift_months": 2,
+    "ks": 0.25,
+    "out_of_range": 0.01,
+    "revision_rate_change": 0.25
+  }
+}

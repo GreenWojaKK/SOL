@@ -1,0 +1,6 @@
+{
+  "package": "solarvpp",
+  "model": "MK4",
+  "evidence": "configs/models.json의 adoption 기록, reports/gate-H-mk4-stratified-w0.2.json·gate-B-mk4-stratified-w0.2.json(MK2 champion run 대비)",
+  "updated": "2026-10-11T19:18:16.598926+09:00"
+}

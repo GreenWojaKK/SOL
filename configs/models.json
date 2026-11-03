@@ -1,0 +1,73 @@
+{
+  "champion": "MK4",
+  "models": {
+    "MK0": {
+      "xgb_input": "forecast-physics",
+      "xgb_time_weight": "none",
+      "dl_input": "forecast-physics",
+      "dl_loss": "ramp",
+      "aux_ratio": 0.1,
+      "dl_time_weight": "none",
+      "blend": "weighted-quantile",
+      "xgb_weight": 0.5
+    },
+    "MK1": {
+      "xgb_input": "forecast-physics",
+      "xgb_time_weight": "none",
+      "dl_input": "forecast-physics-daystate",
+      "dl_loss": "ramp",
+      "aux_ratio": 0.1,
+      "dl_time_weight": "none",
+      "blend": "weighted-quantile",
+      "xgb_weight": 0.5
+    },
+    "MK2": {
+      "xgb_input": "forecast-physics",
+      "xgb_time_weight": "none",
+      "dl_input": "forecast-physics-daystate",
+      "dl_loss": "ramp",
+      "aux_ratio": 0.1,
+      "dl_time_weight": "none",
+      "blend": "weighted-quantile",
+      "xgb_weight": 0.4
+    },
+    "MK4": {
+      "xgb_input": "forecast-physics",
+      "xgb_time_weight": "none",
+      "dl_input": "forecast-physics-daystate",
+      "site_aux_ratio": 10.0,
+      "dl_loss": "ramp",
+      "aux_ratio": 0.1,
+      "dl_time_weight": "none",
+      "blend": "weighted-quantile",
+      "xgb_weight": 0.2
+    }
+  },
+  "adoption": {
+    "previous_champion": "MK2",
+    "champion": "MK4",
+    "model": {
+      "xgb_input": "forecast-physics",
+      "xgb_time_weight": "none",
+      "dl_input": "forecast-physics-daystate",
+      "site_aux_ratio": 10.0,
+      "dl_loss": "ramp",
+      "aux_ratio": 0.1,
+      "dl_time_weight": "none",
+      "blend": "weighted-quantile",
+      "xgb_weight": 0.2
+    },
+    "model_hash": "7e3210d69aedff11ded70244fc9b252f0e57576e97ebd34f4febade90a4cafa3",
+    "source": {
+      "run": "sol-artifact/solarvpp/runs/H/MK2-confirmation-7ad4a0fb6b",
+      "run_key": "7ad4a0fb6b97a67e595b88ed82343de9a8873b28fd0e96822254c12f64dad2fb",
+      "experts": [
+        "xgb",
+        "dl"
+      ],
+      "evaluation_status": "evaluated"
+    },
+    "selection": "explicit",
+    "selected_at": "2026-10-11T19:18:02.743023+09:00"
+  }
+}

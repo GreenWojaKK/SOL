@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "forecast_input": "forecast-solar-diff",
+  "primitive": {"model": "MK2", "seeds": [42, 43, 44]},
+  "instances": ["V", "H", "B", "test"],
+  "models": ["unconditional", "lowrank", "analog"],
+  "risk": {
+    "rank": 6,
+    "width": 64,
+    "minimum_sd": 0.01,
+    "steps": 3000,
+    "batch_hours": 32,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "gradient_clip": 1.0,
+    "seed": 42,
+    "history_prior_hours": 200,
+    "history_issue_slot": 16,
+    "scaler_max_rows": 100000,
+    "forecast_fields": {
+      "wa": ["wa_cloud", "wa_temp", "wa_humidity", "wa_wind_speed", "wa_wind_vec_sin", "wa_wind_vec_cos", "wa_rain", "wa_snow"],
+      "wb": ["wb_cloud", "wb_temp", "wb_dew_point", "wb_rel_hum", "wb_wind_speed", "wb_wind_vec_sin", "wb_wind_vec_cos", "wb_uv_idx", "wb_ceiling", "wb_vis", "wb_precip_prob", "wb_rain"]
+    },
+    "static_fields": ["log_capacity", "wa_dist", "wb_dist"],
+    "history_fields": ["past_mean", "past_rms", "log1p_past_count"],
+    "aggregate_weight": 1.0,
+    "aggregate_partitions": 4
+  },
+  "unconditional": {
+    "similarity_fields": {"wa": "wa_cloud", "wb": "wb_cloud"},
+    "similarity_round": 17,
+    "neighbor_similarity": 0.95
+  },
+  "analog": {
+    "neighbors": 20
+  },
+  "scenarios": {
+    "search_samples_per_hour": 8,
+    "evaluation_samples_per_hour": 64,
+    "search_seed": 7401,
+    "evaluation_seed": 8401,
+    "batch_hours": 128
+  },
+  "optimization": {
+    "fixed_lambda": 1.0,
+    "lambda_frontier": [0.0, 0.1, 0.3, 1.0],
+    "random_starts": 8,
+    "max_iterations": 300,
+    "swap_candidates": 8,
+    "tolerance": 0.000000001,
+    "minimum_final_group_kw": 20000,
+    "center": "median",
+    "device": "cuda",
+    "qubo": {"Threads": 8, "Seed": 0, "WorkLimit": 600},
+    "frontier_qubo": {"Threads": 8, "Seed": 0, "WorkLimit": 120}
+  },
+  "evaluation": {
+    "candidate_pool_size": 200,
+    "candidate_pool_seed": 9301,
+    "bootstrap_days": [7, 14],
+    "bootstrap_replicates": 2000
+  }
+}

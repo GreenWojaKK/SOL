@@ -1,0 +1,29 @@
+# 추적 대상만 허용하고 나머지 최상위 항목은 모두 제외한다.
+/*
+!/.gitignore
+!/solarvpp/
+!/solarvpp2/
+!/vppcontract/
+!/viewer/
+!/docs/
+!/configs/
+!/PROBLEM.md
+!/README.md
+!/pytest.ini
+!/requirements.txt
+
+__pycache__/
+*.pyc
+.DS_Store
+
+# 생성 데이터·학습 artifact는 허용된 소스 폴더 안에서도 추적하지 않는다.
+cache/
+.cache/
+/viewer/target/
+.pytest_cache/
+*.pt
+*.pth
+*.ubj
+*.npy
+*.npz
+*.parquet
